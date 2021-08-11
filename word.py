@@ -8,7 +8,17 @@ from tkinter import filedialog
 from tkinter import font
 from colorama import init
 from termcolor import colored
-init()
+import mysql.connector 
+
+
+con=mysql.connector.connect(
+user="ardit700_student",
+password="ardit700_student",
+host="108.167.140.122",
+database="ardit700_pm1database"
+)
+cursor=con.cursor()
+word='line'
 
 window=Tk()
 
@@ -23,14 +33,15 @@ window.title(20*" "+'Dictionary')
 def output(word):
     t1.delete('1.0',END)
     word1=word.capitalize()
-    # print(colored('Python Programming !', 'green', 'on_red'))
-    # bolded_string = "\033[1m"+word1+"\033[0m"
     t1.insert(END, "\n"+  word1 +":\n", 'bold_italics')
-    if type(data[word])==list:
-        for item in data[word]:
-            t1.insert(END, "> "+item +"\n")
+    query=cursor.execute("SELECT * FROM Dictionary WHERE Expression=%(wrd)s",{ 'wrd': word})
+    results=cursor.fetchall()
+    if type(results)==list:
+        for item in results:
+            t1.insert(END, "- "+item[1])
+            t1.insert(END,"\n")
     else:
-        t1.insert(END, data[word])
+        t1.insert(END, results)
     
     e1.delete(0,END)
 def forget():
@@ -49,7 +60,7 @@ def no():
     e1.delete(0,END)
     forget()
 
-def meaning():
+def meaning(*arg):
     forget()
     t1.delete('1.0',END)
     word=e1.get().lower()
@@ -86,15 +97,19 @@ for i in range(10):
     lb=Label(frame, text="", bg="salmon", width=13)
     lb.grid(row=i,column=1)
 
-
+def enter(event=None):
+    word=e1.get()
+    meaning()
 lb1=Label(frame, text="Enter The word", font='Helvetica 16 bold', bd=5,borderwidth=10,bg="salmon" )
 lb1.grid(row=3,column=1,columnspan=2, sticky=N+S+E+W)
 
 entry1=StringVar()
 e1=Entry(frame,textvariable=entry1, font=(10),width=25)
+e1.bind('<Return>', meaning)
 e1.grid(row=4,column=2,  rowspan=1, columnspan=2, sticky=N+S+E+W)
 
 bt1=Button(frame, text="Submit",command=meaning)
+
 bt1.grid(row=4,column=4,rowspan=1, sticky=N+S+E)
 
 
